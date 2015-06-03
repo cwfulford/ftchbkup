@@ -1,0 +1,53 @@
+<pre>
+
+# $Id: ftchbkup.cf,v 1.14 2014/05/26 10:44:53 fulford Exp $
+# $Source: /src/merlin/usr/local/etc/RCS/ftchbkup.cf,v $
+# $Revision: 1.14 $
+# Author C W Fulford.
+# Copyright 2013 (c) C W Fulford. All rights reserved.
+# For assistance contact fulford@fulford.net 0709 229 5385
+###################################################################
+# Configuration file for ftchbkup.
+# Stanzas commence with a keyword followed by a colon. The 5 following
+# equates should be indented with a tab.
+# hostname is the symbolic name or ip address of the target host, it
+# may be the same as the key. 
+# basedir is the starting point for the "find" on the remote host.
+# files is a space separated list of file names to be passed to "find"
+# on the remote host. Wild cards in the regular expressions will be
+# escaped appropriately by "ftchbkup".
+# mtime is expected age of the backups. For a script run daily this
+# should be -1 ie less than 24 hours old.
+# max is the maximum age of backups in the local repository in days.
+# After this period the archive may be deleted.
+
+dougal:
+	hostname=imap.dougal.roundabout.com
+	basedir=/var/www/vhosts 
+	files="httpdocs_*.tar.gz mysql_*.sql.gz" 
+	mtime=-1			
+	max=+3
+	store=/backup/dougal
+
+caswallon-gw:
+	hostname=caswallon-gw.fulford.net
+	basedir=/var/backups
+	files="*.tar.gz"
+	mtime=-1
+	max=+2
+######################################################################
+# This program is free software: you can redistribute it and or      #
+# modify it under the terms of the Lesser GNU General Public License #
+# as published by the Free Software Foundation, either version 3 of  #
+# the License, or (at your option) any later version.                #
+#                                                                    #
+# This program is distributed in the hope that it will be useful,    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of     #    
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      #
+# GNU General Public License for more details.                       #
+#                                                                    # 
+# A copy of the Lesser GNU General Public License and the GNU        #
+# General Public License is available at                             #
+# &#60;http://www.gnu.org/licenses/&#62;.                                    #
+######################################################################
+</pre>

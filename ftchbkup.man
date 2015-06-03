@@ -1,0 +1,78 @@
+.TH FTCHBKUP 8l "07 November r
+.SH NAME
+.B ftchbkup
+- fetches backups from remote host to a local repository.
+.SH SYNOPSIS
+\fBftchbkup \fR[\fB-c \fI<config>\fR] [\fB-d\fR] [\fB-l\fR][\fB-v\fR] <\fIhostname\fB>
+.br
+.SH AVAILABILITY
+.B ftchbkup
+is a Bourne shell script which should work equally well on all versions of UNIX,
+Linux and Mac OS X.
+.SH DESCRIPTION
+.B ftchbkup
+uses the configuration file (\fI/usr/local/etc/ftchbkup.cf\fR by default) to
+determine the location and age of the backup files to fetched from the remote
+host and the path to the local repository. The archives are fetched using
+.B lftp .
+.LP
+In order to save disk space in the local repository, archives older than 
+the maximum age set in configuration file are deleted once the 
+the latest files have been successfully downloaded.
+.SH OPTIONS
+.TP 5
+.B -c
+.I <config_file>
+Use the named configuration file in preference to the default 
+.B /usr/local/etc/ftchbkup.cf .
+.TP 5
+\fB-d\fR
+Start in debug mode.
+The script will run in a shell with the 
+.B -x
+option set.
+.TP 5
+.B -l
+Log each backup field retrieved from the target host using the 
+.B syslog
+facility.
+.TP 5
+.B -v
+Set verbose mode. Ordinarily 
+.B ftchbkup
+operates silently unless problems are detected. In 
+.I verbose
+mode 
+.B ftchbkup
+reports on each significant action.
+.SH EXAMPLES
+.IP
+.ft CW
+ftchbkup -v caswallon-gw
+.ft R
+.LP
+Using the hostname "\fIcaswallon-gw\fR" as the lookup key,
+.B ftchbkup
+will extract the details of the backup files to be fetched from the
+default configuration file
+.I /usr/local/etc/ftchbkup.cf ,
+and fetch them from the remote server to the local repository.
+.SH BUGS
+The script is quite crude having been developed to fetch archives from
+client servers hosted by 1and1. The use of the configuration file does
+however make it reasonably generic.
+File permissions are critical and .B sudo
+will be used within the script to execute the find command. 
+With judicious use of the 
+.I debug
+and
+.I verbose 
+modes, permission and configuration problems should be relatively easy to 
+resolve.
+.SH FILES
+.IR ftchbkup.cf .
+.SH SEE ALSO
+.IR clean .
+.SH AUTHOR
+Clifford W Fulford, City Linux. Contact fulford@fulford.net or +44 (0)709 229 5385.
+.SH HISTORY

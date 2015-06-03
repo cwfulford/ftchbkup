@@ -1,0 +1,68 @@
+#!/bin/ksh
+# $Id: ftchbkup,v 1.58 2015/03/21 13:30:13 fulford Exp $
+# $Source: /src/merlin/usr/local/etc/RCS/ftchbkup,v $
+# $Revision: 1.58 $
+# Author C W Fulford.
+# Copyright 2013 (c) C W Fulford. 
+# Licensed for public use under the LGPL.
+# For assistance contact fulford@fulford.net 0709 229 5385
+#########################################################################
+cmd=`basename $0`
+syntax="$cmd [-c <config>] [-d(debug)] [-l] [-v(erbose)] <host_name>"
+while [ $# -gt 0 ] ;do
+	case $1 in 
+		-c) config=$2;shift 2;;
+		-d) debug=1;set -x;shift;;
+		-l) log=:;shift;;
+		-v) verbose=:;shift;;
+		*) host=$1;shift ;;
+	esac
+done
+[ -z "$host" ]&& { echo $syntax >&2 ;exit;}
+arcls=/tmp/arc-$host-$$
+config=${config:-"/usr/local/etc/ftchbkup.cf"}
+tmp=/tmp/$cmd.$$
+if [ $verbose ];then
+	sed -ne "/^$host:$/,/^$/{
+		/^[	 ][^#]*=[:alpha:]*/p
+	}" $config
+fi
+eval `sed -ne "/^$host:$/,/^$/{
+	/^[	 ][^#]*=[:alpha:]*/p
+}" $config` 
+max=${max:-3} # Age in days after which archives deleted.
+mtime=${mtime:-"-1"} # Time archive created
+store=${store:-/backup/$host}
+[ -z "$files" ]&&{ echo "$cmd: file list not found in $config" >&2; exit 1 ;}
+
+for f in $files ;do
+	f=`echo $f|sed -e 's/\*/\\\*/g'`
+	ssh $host "cd $basedir
+		   sudo find ./ -name $f -mtime $mtime -print" >>$arcls
+done
+
+sudo [ -w $store ] || { echo "$cmd: can't write to $store, retrying in 2" >&2
+		  sleep 2
+		  sudo [ -w $store ] ||{
+			echo "$cmd: can't write to $store. Terminating" >&2
+		  	exit 1 
+		  }
+}
+[ -d $store ] && cd $store
+
+cat $arcls|sed -e 's/^\.\///'|
+while read a ;do
+	[ "$verbose" ] && echo "$cmd: fetching $a"
+	arcdir=`dirname $a`
+	[ ! -d  $arcdir ] && sudo mkdir -p $arcdir
+	if ssh $host "sudo dd if="$basedir"/$a 2>/dev/null" |
+		sudo dd of=$a 2>/dev/null;then
+			[ "$log" ] && logger -t $cmd-$host "$a complete"
+			[ "$verbose" ] && echo "$cmd: deleting older archives"
+			find  ./$arcdir -mtime $max -exec sudo rm {} \;
+	else
+		[ "$log" ] && logger -t $cmd-$host "$a failed" 
+	fi
+done
+[ "$verbose" ] && echo "removing $arcls"
+rm $arcls
